@@ -22,7 +22,6 @@ def censor(text, bad_words):
     final = []
     text_split = text.split(" ")
     for word in text_split:
-        final_word = word
         if word.lower() in bad_words:
             final.append("\*"*len(word))
         else:
@@ -44,19 +43,15 @@ class Automod(commands.Cog):
         if message.author.bot:
             return
         
-        #if message.author.guild_permissions.manage_messages:
-            #return
+        if message.author.guild_permissions.manage_messages:
+            return
 
         first_text = message.content.lower().split(" ")
         final = []
 
         for word in first_text:
-            if "\u200b" in word:
-                final.append("".join([char for char in word if char != "\u200b"]))
-            else:
-                final.append(word)
-            print(word)
-            print(final)
+            final_word = word.split("​")
+            final.append("".join(final_word))
 
         bad_words = info["bad_words"]
 
@@ -64,7 +59,7 @@ class Automod(commands.Cog):
             if a in final:
                 await message.delete()
                 a = await message.channel.create_webhook(name = message.author.name)
-                await a.send(content = censor(message.content, bad_words), avatar_url = message.author.avatar_url_as(format='png', size=1024))
+                await a.send(content = censor(" ".join(final), bad_words), avatar_url = message.author.avatar_url_as(format='png', size=1024))
                 await a.delete()
                 return
 
